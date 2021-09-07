@@ -1,8 +1,10 @@
 import pino from "pino";
-const looger = pino({
+const logger = pino({
     prettyPrint: {
         ignore: "pid, hostname"
     }
 });
 
-export { looger };
+export {
+    logger,
+};
