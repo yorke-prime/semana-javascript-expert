@@ -1,4 +1,4 @@
-import  {
+import {
     describe,
     test,
     expect,
@@ -12,14 +12,14 @@ describe("#Routes suite test", () => {
             const routes = new Routes();
             const ioObj = {
                 to: (id) => ioObj,
-                emit: (event, message) => {}
+                emit: (event, message) => { }
             }
 
             routes.setSocketInstance(ioObj);
             expect(routes.io).toStrictEqual(ioObj);
         });
-    })
-    
+    });
+
     describe("#handler", () => {
         const defaultParams = {
             request: {
@@ -90,5 +90,46 @@ describe("#Routes suite test", () => {
             await routes.handler(...params.values());
             expect(routes.get).toHaveBeenCalled();
         });
+    });
+
+    describe("#get", () => {
+        const defaultParams = {
+            request: {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                },
+                method: "",
+                body: {}
+            },
+            response: {
+                setHeader: jest.fn(),
+                writeHead: jest.fn(),
+                end: jest.fn()
+            },
+            values: () => Object.values(defaultParams)
+        }
+        test("given method GET it should list all files download", async () => {
+            const routes = new Routes();
+            const params = {
+                ...defaultParams
+            }
+            
+            const filesStatusesMock = [
+                {
+                    size: "1.78 MB",
+                    lastModified: "2021-09-07T19:56:22.785Z",
+                    owner: "yorke",
+                    file: "file.png"
+                }
+            ]
+            jest.spyOn(routes.fileHelper, routes.fileHelper.getFilesStatus.name)
+                .mockResolvedValue(filesStatusesMock);
+            
+            params.request.method = "GET";
+            await routes.handler(...params.values());
+
+            expect(params.response.writeHead).toHaveBeenCalledWith(200);
+            expect(params.response.end).toHaveBeenCalledWith(JSON.stringify(filesStatusesMock));
+        })  
     });
 })
